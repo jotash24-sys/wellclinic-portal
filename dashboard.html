@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Well Clinic — Dashboard Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #0F1F3A;
+    --dourado: #A0896C;
+    --verde: #4A9E8E;
+    --marfim: #FAF7F2;
+    --vermelho: #D4644A;
+    --branco: #FFFFFF;
+    --cinza-leve: #E8E4DF;
+    --cinza-texto: #6B7280;
+    --sombra: 0 2px 12px rgba(15,31,58,0.08);
+    --sombra-forte: 0 4px 24px rgba(15,31,58,0.12);
+    --radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--marfim);
+    color: var(--azul);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--azul), #162847);
+    color: var(--marfim);
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(15,31,58,0.3);
+  }
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header h1 {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .header-badge {
+    background: var(--dourado);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .header-date {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px;
+    padding-bottom: 80px;
+  }
+
+  /* ---- METRIC CARDS ---- */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .metric-card {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    box-shadow: var(--sombra);
+    text-align: center;
+    transition: var(--transition);
+    border-top: 3px solid transparent;
+  }
+  .metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-forte);
+  }
+  .metric-card.ok { border-top-color: var(--verde); }
+  .metric-card.pending { border-top-color: var(--dourado); }
+  .metric-card.alert { border-top-color: var(--vermelho); }
+  .metric-card.info { border-top-color: var(--azul); }
+
+  .metric-icon { font-size: 1.5rem; margin-bottom: 6px; }
+  .metric-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-family: 'Lora', serif;
+    color: var(--azul);
+  }
+  .metric-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--cinza-texto);
+    margin-top: 2px;
+  }
+
+  /* ---- CONTINGÊNCIA BANNER ---- */
+  .contingencia-banner {
+    background: linear-gradient(135deg, var(--azul), #1a2d4d);
+    color: var(--marfim);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .cont-icon { font-size: 2rem; }
+  .cont-info h3 {
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+  .cont-info p {
+    font-size: 0.82rem;
+    opacity: 0.8;
+  }
+  .cont-info strong { color: var(--dourado); }
+
+  /* ---- SECTION ---- */
+  .section-title {
+    font-family: 'Lora', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--azul);
+    margin: 24px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--dourado);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ---- REGISTRO CARD ---- */
+  .registro-card {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--sombra);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: var(--transition);
+    border-left: 4px solid var(--verde);
+  }
+  .registro-card.has-pendencia { border-left-color: var(--vermelho); }
+
+  .registro-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--verde);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .registro-card.has-pendencia .registro-avatar { background: var(--vermelho); }
+
+  .registro-info { flex: 1; }
+  .registro-nome {
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .registro-detail {
+    font-size: 0.78rem;
+    color: var(--cinza-texto);
+    margin-top: 2px;
+  }
+  .registro-stats {
+    text-align: right;
+  }
+  .registro-count {
+    font-family: 'Lora', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--verde);
+  }
+  .registro-card.has-pendencia .registro-count { color: var(--vermelho); }
+  .registro-time {
+    font-size: 0.7rem;
+    color: var(--cinza-texto);
+  }
+
+  /* ---- RESERVA CARD (dashboard) ---- */
+  .reserva-dash-card {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--sombra);
+    margin-bottom: 10px;
+    border-left: 4px solid var(--dourado);
+  }
+  .reserva-dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .reserva-dash-header h4 {
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .status-badge.pendente { background: #FEF3C7; color: #92400E; }
+  .status-badge.aprovada { background: #D1FAE5; color: #065F46; }
+  .status-badge.rejeitada { background: #FEE2E2; color: #991B1B; }
+
+  .reserva-details {
+    font-size: 0.82rem;
+    color: var(--cinza-texto);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-approve, .btn-reject {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .btn-approve {
+    background: var(--verde);
+    color: white;
+  }
+  .btn-approve:hover { background: #3D8A7C; }
+  .btn-reject {
+    background: var(--cinza-leve);
+    color: var(--azul);
+  }
+  .btn-reject:hover { background: #ddd; }
+
+  /* ---- HISTÓRICO TABLE ---- */
+  .hist-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--branco);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--sombra);
+    font-size: 0.8rem;
+  }
+  .hist-table th {
+    background: var(--azul);
+    color: var(--marfim);
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .hist-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--cinza-leve);
+  }
+  .hist-table tr:last-child td { border-bottom: none; }
+  .hist-table tr:hover td { background: rgba(74,158,142,0.04); }
+
+  .badge-complete {
+    background: #D1FAE5;
+    color: #065F46;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .badge-partial {
+    background: #FEF3C7;
+    color: #92400E;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  /* ---- LOADING ---- */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--cinza-texto);
+  }
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--cinza-leve);
+    border-top-color: var(--verde);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--cinza-texto);
+  }
+  .empty-state .icon { font-size: 2rem; margin-bottom: 8px; }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--azul);
+    color: var(--marfim);
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(15,31,58,0.3);
+    z-index: 1000;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 90%;
+    text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--verde); }
+  .toast.error { background: var(--vermelho); }
+
+  /* ---- REFRESH BTN ---- */
+  .refresh-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--verde);
+    color: white;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(74,158,142,0.3);
+    transition: var(--transition);
+    z-index: 50;
+  }
+  .refresh-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(74,158,142,0.4);
+  }
+
+  /* ---- OPERATOR LINK ---- */
+  .link-operador {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: var(--dourado);
+    text-decoration: none;
+    opacity: 0.8;
+  }
+  .link-operador:hover { opacity: 1; text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="header-row">
+    <div>
+      <h1>Well Clinic — Dashboard</h1>
+      <div class="header-date" id="headerDate">Carregando...</div>
+      <a href="index.html" class="link-operador">← Voltar ao Portal</a>
+    </div>
+    <span class="header-badge">Gestão</span>
+  </div>
+</div>
+
+<!-- ===== CONTENT ===== -->
+<div class="container">
+
+  <!-- Métricas -->
+  <div class="metrics-grid" id="metricsGrid">
+    <div class="metric-card pending">
+      <div class="metric-icon">🌅</div>
+      <div class="metric-value" id="metAbertura">—</div>
+      <div class="metric-label">Abertura</div>
+    </div>
+    <div class="metric-card pending">
+      <div class="metric-icon">🌙</div>
+      <div class="metric-value" id="metFechamento">—</div>
+      <div class="metric-label">Fechamento</div>
+    </div>
+    <div class="metric-card info">
+      <div class="metric-icon">👥</div>
+      <div class="metric-value" id="metChecks">—</div>
+      <div class="metric-label">Checks Hoje</div>
+    </div>
+    <div class="metric-card pending">
+      <div class="metric-icon">🗓</div>
+      <div class="metric-value" id="metReservas">—</div>
+      <div class="metric-label">Reservas Pendentes</div>
+    </div>
+  </div>
+
+  <!-- Contingência -->
+  <div class="contingencia-banner" id="contingenciaBanner">
+    <div class="cont-icon">🔐</div>
+    <div class="cont-info">
+      <h3 id="contTitle">Carregando...</h3>
+      <p id="contDesc"></p>
+    </div>
+  </div>
+
+  <!-- Registros de Hoje -->
+  <div class="section-title">📋 Registros de Hoje</div>
+  <div id="registrosContainer">
+    <div class="loading"><div class="spinner"></div>Carregando...</div>
+  </div>
+
+  <!-- Reservas Pendentes -->
+  <div class="section-title">🗓 Reservas Pendentes</div>
+  <div id="reservasContainer">
+    <div class="loading"><div class="spinner"></div>Carregando...</div>
+  </div>
+
+  <!-- Histórico -->
+  <div class="section-title">📊 Histórico (7 dias)</div>
+  <div id="historicoContainer">
+    <div class="loading"><div class="spinner"></div>Carregando...</div>
+  </div>
+
+</div>
+
+<!-- Refresh FAB -->
+<button class="refresh-btn" onclick="loadDashboard()" title="Atualizar">🔄</button>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ============================================
+  // CONFIGURAÇÃO
+  // ============================================
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzAEfzJP8hpnPkWQJDqXtIqeDRLlOu74OKwwtDAXW5DRt257a1XvntsGs4ZMyvwCemT/exec';
+
+  // ============================================
+  // INICIALIZAÇÃO
+  // ============================================
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDashboard();
+    // Auto-refresh a cada 60s
+    setInterval(loadDashboard, 60000);
+  });
+
+  async function loadDashboard() {
+    updateHeaderDate();
+
+    try {
+      const [dashRes, histRes] = await Promise.all([
+        fetch(`${API_URL}?action=getDashboard`),
+        fetch(`${API_URL}?action=getHistorico&dias=7`)
+      ]);
+
+      const dashboard = await dashRes.json();
+      const historico = await histRes.json();
+
+      renderMetrics(dashboard);
+      renderContingencia(dashboard.contingencia);
+      renderRegistros(dashboard.registrosHoje);
+      renderReservas(dashboard.reservasPendentes);
+      renderHistorico(historico);
+    } catch (err) {
+      console.error('Erro ao carregar dashboard:', err);
+      renderFallback();
+    }
+  }
+
+  function updateHeaderDate() {
+    const now = new Date();
+    const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    document.getElementById('headerDate').textContent =
+      `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} de ${now.getFullYear()}`;
+  }
+
+  // ============================================
+  // RENDER FUNCTIONS
+  // ============================================
+  function renderMetrics(data) {
+    const abEl = document.getElementById('metAbertura');
+    const feEl = document.getElementById('metFechamento');
+
+    abEl.textContent = data.aberturaFeita ? '✅' : '⏳';
+    abEl.closest('.metric-card').className = `metric-card ${data.aberturaFeita ? 'ok' : 'pending'}`;
+
+    feEl.textContent = data.fechamentoFeito ? '✅' : '⏳';
+    feEl.closest('.metric-card').className = `metric-card ${data.fechamentoFeito ? 'ok' : 'pending'}`;
+
+    document.getElementById('metChecks').textContent = data.registrosHoje.length;
+    document.getElementById('metReservas').textContent = data.reservasPendentes.length;
+
+    const resCard = document.getElementById('metReservas').closest('.metric-card');
+    resCard.className = `metric-card ${data.reservasPendentes.length > 0 ? 'alert' : 'ok'}`;
+  }
+
+  function renderContingencia(cont) {
+    if (!cont) return;
+    document.getElementById('contTitle').textContent = `${cont.diaSemana} — Protocolo de Fechamento`;
+    document.getElementById('contDesc').innerHTML = `
+      Responsável: <strong>${cont.responsavelPrincipal}</strong> · 
+      Backup: <strong>${cont.backup}</strong> (${cont.backupCargo || ''})
+    `;
+  }
+
+  function renderRegistros(registros) {
+    const container = document.getElementById('registrosContainer');
+
+    if (!registros || registros.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Nenhum registro hoje ainda.</p></div>';
+      return;
+    }
+
+    container.innerHTML = registros.map(r => {
+      const hasPend = r.pendencias && r.pendencias !== 'Nenhuma';
+      const initials = r.responsavel.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const time = r.timestamp ? r.timestamp.split(' ')[1] || '' : '';
+
+      return `
+        <div class="registro-card ${hasPend ? 'has-pendencia' : ''}">
+          <div class="registro-avatar">${initials}</div>
+          <div class="registro-info">
+            <div class="registro-nome">${r.responsavel}</div>
+            <div class="registro-detail">
+              ${r.tipo} · ${r.perfil}
+              ${hasPend ? '<br>⚠️ ' + r.pendencias : ''}
+            </div>
+          </div>
+          <div class="registro-stats">
+            <div class="registro-count">${r.itensConcluidos}/${r.totalItens}</div>
+            <div class="registro-time">${time}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderReservas(reservas) {
+    const container = document.getElementById('reservasContainer');
+
+    if (!reservas || reservas.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>Nenhuma reserva pendente.</p></div>';
+      return;
+    }
+
+    container.innerHTML = reservas.map(r => `
+      <div class="reserva-dash-card" data-linha="${r.linha}">
+        <div class="reserva-dash-header">
+          <h4>${r.sala} — ${r.solicitante}</h4>
+          <span class="status-badge pendente">Pendente</span>
+        </div>
+        <div class="reserva-details">
+          📅 ${r.dataReserva} · ⏰ ${r.horaInicio} às ${r.horaFim}<br>
+          📝 ${r.motivo}
+        </div>
+        <div class="action-buttons">
+          <button class="btn-approve" onclick="handleReserva(${r.linha}, 'aprovar')">✅ Aprovar</button>
+          <button class="btn-reject" onclick="handleReserva(${r.linha}, 'rejeitar')">❌ Rejeitar</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderHistorico(historico) {
+    const container = document.getElementById('historicoContainer');
+
+    if (!historico || historico.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">📊</div><p>Sem registros nos últimos 7 dias.</p></div>';
+      return;
+    }
+
+    // Agrupar por data
+    const rows = historico.map(r => {
+      const complete = r.itensConcluidos === r.totalItens;
+      return `
+        <tr>
+          <td>${r.data}</td>
+          <td>${r.responsavel}</td>
+          <td>${r.tipo}</td>
+          <td>${r.itensConcluidos}/${r.totalItens}</td>
+          <td>
+            <span class="${complete ? 'badge-complete' : 'badge-partial'}">
+              ${complete ? 'Completo' : 'Parcial'}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Responsável</th>
+            <th>Tipo</th>
+            <th>Itens</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  // ============================================
+  // RESERVA ACTIONS
+  // ============================================
+  async function handleReserva(linha, acao) {
+    const action = acao === 'aprovar' ? 'aprovarReserva' : 'rejeitarReserva';
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: action,
+          linha: linha,
+          aprovador: 'Jonathan', // TODO: dynamic
+          observacao: ''
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        showToast(`✅ Reserva ${acao === 'aprovar' ? 'aprovada' : 'rejeitada'}!`, 'success');
+        loadDashboard();
+      }
+    } catch (err) {
+      showToast('❌ Erro ao processar reserva', 'error');
+    }
+  }
+
+  // ============================================
+  // FALLBACK (offline / sem API)
+  // ============================================
+  function renderFallback() {
+    document.getElementById('metAbertura').textContent = '—';
+    document.getElementById('metFechamento').textContent = '—';
+    document.getElementById('metChecks').textContent = '—';
+    document.getElementById('metReservas').textContent = '—';
+
+    const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const hoje = dias[new Date().getDay()];
+    let backup = 'Gabriela';
+    if (hoje === 'Qui') backup = 'Concierge';
+    renderContingencia({
+      diaSemana: hoje,
+      responsavelPrincipal: 'Jonathan',
+      backup: backup,
+      backupCargo: hoje === 'Qui' ? 'Recepcionista Concierge' : 'Recepcionista Operacional'
+    });
+
+    document.getElementById('registrosContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">📡</div><p>Sem conexão com o servidor.<br>Verifique a URL do Apps Script.</p></div>';
+    document.getElementById('reservasContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">📡</div><p>Sem conexão.</p></div>';
+    document.getElementById('historicoContainer').innerHTML =
+      '<div class="empty-state"><div class="icon">📡</div><p>Sem conexão.</p></div>';
+  }
+
+  // ============================================
+  // TOAST
+  // ============================================
+  function showToast(msg, type = '') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = `toast ${type} show`;
+    setTimeout(() => toast.classList.remove('show'), 3500);
+  }
+</script>
+</body>
+</html>
