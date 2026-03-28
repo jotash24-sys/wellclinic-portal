@@ -782,6 +782,9 @@
     loadEquipe();
     setDefaultDate();
 
+    // Auto-detectar usuário logado via sessão do sistema de gases
+    tryAutoLogin();
+
     // Deep link: se veio do portal com ?view=reserva
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('view') === 'reserva') {
@@ -790,6 +793,65 @@
       }, 300);
     }
   });
+
+  function tryAutoLogin() {
+    try {
+      const sess = localStorage.getItem('wc_session');
+      if (!sess) return;
+      const parsed = JSON.parse(sess);
+      if (parsed && parsed.nome) {
+        // Esperar equipe carregar, depois selecionar automaticamente
+        const checkInterval = setInterval(() => {
+          if (equipe.length > 0) {
+            clearInterval(checkInterval);
+            autoSelectUser(parsed.nome, parsed.perfil || '');
+          }
+        }, 100);
+        // Timeout de segurança: 3s
+        setTimeout(() => clearInterval(checkInterval), 3000);
+      }
+    } catch(e) {
+      console.error('Auto-login falhou:', e);
+    }
+  }
+
+  function autoSelectUser(nome, perfil) {
+    const select = document.getElementById('selectPessoa');
+    const reservaSelect = document.getElementById('reservaSolicitante');
+    // Tentar match exato ou parcial pelo primeiro nome
+    let matched = false;
+    for (let i = 0; i < select.options.length; i++) {
+      const optText = select.options[i].text.toLowerCase();
+      const optVal = select.options[i].value.toLowerCase();
+      if (optVal === nome.toLowerCase() || optText.includes(nome.split(' ')[0].toLowerCase())) {
+        select.selectedIndex = i;
+        matched = true;
+        break;
+      }
+    }
+    if (matched) {
+      // Esconder o card de seleção e mostrar badge
+      const selectCard = select.closest('.select-card');
+      const badge = document.createElement('div');
+      badge.className = 'select-card';
+      badge.innerHTML = '<div style="display:flex;align-items:center;gap:10px;">'
+        + '<span style="font-size:18px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(160,137,108,.15);border-radius:50%;">👤</span>'
+        + '<div><div style="font-weight:600;font-size:14px;color:#0F1F3A;">' + nome + '</div>'
+        + '<div style="font-size:11px;color:#5A5A6E;text-transform:uppercase;letter-spacing:.3px;">Responsável</div></div></div>';
+      selectCard.parentNode.insertBefore(badge, selectCard);
+      selectCard.style.display = 'none';
+      // Auto-selecionar na reserva também
+      for (let i = 0; i < reservaSelect.options.length; i++) {
+        const optText = reservaSelect.options[i].text.toLowerCase();
+        if (optText.includes(nome.split(' ')[0].toLowerCase())) {
+          reservaSelect.selectedIndex = i;
+          break;
+        }
+      }
+      // Disparar o onchange
+      onPessoaChange();
+    }
+  }
 
   async function loadEquipe() {
     try {
