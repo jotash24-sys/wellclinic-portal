@@ -800,14 +800,12 @@
       if (!sess) return;
       const parsed = JSON.parse(sess);
       if (parsed && parsed.nome) {
-        // Esperar equipe carregar, depois selecionar automaticamente
         const checkInterval = setInterval(() => {
           if (equipe.length > 0) {
             clearInterval(checkInterval);
-            autoSelectUser(parsed.nome, parsed.perfil || '');
+            autoSelectUser(parsed.nome, parsed.user || parsed);
           }
         }, 100);
-        // Timeout de segurança: 3s
         setTimeout(() => clearInterval(checkInterval), 3000);
       }
     } catch(e) {
@@ -819,20 +817,17 @@
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   }
 
-  function autoSelectUser(nome, perfil) {
+  function autoSelectUser(nome, userInfo) {
     const select = document.getElementById('selectPessoa');
     const reservaSelect = document.getElementById('reservaSolicitante');
-    // Match inteligente: tirar acentos e comparar prefixo do primeiro nome
-    // Ex: "Jonatã" → "jonata" match com "Jonathan" → "jonathan" (ambos começam com "jonat")
     const firstName = stripAccents(nome.split(' ')[0]);
     const prefix = firstName.substring(0, Math.min(4, firstName.length));
-    let matched = false;
 
+    // Tentar match na equipe (prefixo sem acentos)
     function fuzzyMatch(selectEl) {
       for (let i = 1; i < selectEl.options.length; i++) {
         const optVal = stripAccents(selectEl.options[i].value);
         const optWords = stripAccents(selectEl.options[i].text).split(/[\s—-]+/);
-        // Match: valor exato, ou alguma palavra começa com o mesmo prefixo
         if (optVal === stripAccents(nome) || optVal.startsWith(prefix) || optWords.some(w => w.startsWith(prefix))) {
           selectEl.selectedIndex = i;
           return true;
@@ -841,9 +836,23 @@
       return false;
     }
 
-    matched = fuzzyMatch(select);
+    let matched = fuzzyMatch(select);
+
+    // Se não achou na lista, criar entrada com dados da sessão
+    if (!matched) {
+      const cargoMap = { gestor:'Administração', operador:'Operador', locatario:'Dentista (Locatário)' };
+      const cargo = (userInfo && userInfo.cargo) || cargoMap[(userInfo && userInfo.perfil)] || 'Equipe';
+      equipe.push({ nome: nome, cargo: cargo, podFechar: ((userInfo && userInfo.perfil) === 'gestor') });
+      select.add(new Option(nome + ' — ' + cargo, nome));
+      select.selectedIndex = select.options.length - 1;
+      reservaSelect.add(new Option(nome + ' — ' + cargo, nome));
+      reservaSelect.selectedIndex = reservaSelect.options.length - 1;
+      matched = true;
+    } else {
+      fuzzyMatch(reservaSelect);
+    }
+
     if (matched) {
-      // Esconder o card de seleção e mostrar badge
       const selectCard = select.closest('.select-card');
       const badge = document.createElement('div');
       badge.className = 'select-card';
@@ -853,9 +862,6 @@
         + '<div style="font-size:11px;color:#5A5A6E;text-transform:uppercase;letter-spacing:.3px;">Responsável</div></div></div>';
       selectCard.parentNode.insertBefore(badge, selectCard);
       selectCard.style.display = 'none';
-      // Auto-selecionar na reserva também
-      fuzzyMatch(reservaSelect);
-      // Disparar o onchange
       onPessoaChange();
     }
   }
