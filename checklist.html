@@ -800,13 +800,25 @@
       if (!sess) return;
       const parsed = JSON.parse(sess);
       if (parsed && parsed.nome) {
+        // Esconder dropdown IMEDIATAMENTE enquanto carrega
+        const selectCard = document.getElementById('selectPessoa');
+        if (selectCard && selectCard.closest('.select-card')) {
+          selectCard.closest('.select-card').style.opacity = '0';
+          selectCard.closest('.select-card').style.transition = 'opacity 0.3s';
+        }
         const checkInterval = setInterval(() => {
           if (equipe.length > 0) {
             clearInterval(checkInterval);
             autoSelectUser(parsed.nome, parsed.user || parsed);
           }
         }, 100);
-        setTimeout(() => clearInterval(checkInterval), 3000);
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          // Se não conseguiu auto-selecionar, restaurar dropdown
+          if (!pessoaSelecionada && selectCard && selectCard.closest('.select-card')) {
+            selectCard.closest('.select-card').style.opacity = '1';
+          }
+        }, 5000);
       }
     } catch(e) {
       console.error('Auto-login falhou:', e);
@@ -1434,3 +1446,4 @@
 </script>
 </body>
 </html>
+
